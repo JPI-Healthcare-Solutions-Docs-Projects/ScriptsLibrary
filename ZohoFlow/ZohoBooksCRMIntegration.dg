@@ -1,0 +1,184 @@
+void CRM_BooksIntegration()
+{
+//Query Zoho CRM for json info on most recent Sales Order
+query_map = Map();
+query_map.put("sort_order","desc");
+query_map.put("sort_by","Created_Time");
+response = zoho.crm.getRecords("Sales_Orders",1,10,query_map,"zohocrmconnection");
+salesOrder = response.toMap();
+info salesOrder;
+crmID = salesOrder.get("id");
+//Custom fields
+salesOrderOwner = salesOrder.get("Owner");
+purchaseOrder = salesOrder.get("Purchase_Order");
+shippingStreet = salesOrder.get("Shipping_Street");
+shippingCity = salesOrder.get("Shipping_City");
+shippingState = salesOrder.get("Shipping_State");
+shippingCountry = salesOrder.get("Shipping_Country");
+shippingCode = salesOrder.get("Shipping_Code");
+billingStreet = salesOrder.get("Billing_Street");
+billingCity = salesOrder.get("Billing_City");
+billingState = salesOrder.get("Billing_State");
+billingCountry = salesOrder.get("Billing_Country");
+billingCode = salesOrder.get("Billing_Code");
+application = salesOrder.get("Application");
+carrier = salesOrder.get("Carrier");
+subjects = salesOrder.get("Subject");
+jpiQuote = salesOrder.get("JPI_Quote");
+shippingCost = salesOrder.get("Grand_Total") - salesOrder.get("Sub_Total") - salesOrder.get("Tax") - salesOrder.get("Adjustment");
+info shippingCost;
+attn = salesOrder.get("ATTN");
+//Using the CRM custsomer and mapping it to the books Customer
+AccountName = salesOrder.get("Account_Name").get("name");
+searchParam = {"customer_name":AccountName};
+info "Going to fetch customer in books";
+info searchParam;
+response2 = zoho.books.getRecords("Customers","812636655",searchParam,"zohobooksconnection");
+if(response2.get("code") == 0)
+{
+	contacts = response2.toMap();
+	if(contacts.get("contacts").size() > 0)
+	{
+		contactid = contacts.get("contacts").get(0).get("contact_id").toLong();
+		info "Successfully fetched Contact ID : " + contactid;
+	}
+}
+else
+{
+	info response2;
+}
+newSalesOrder = Map();
+//Mapping the product pricing and discounts
+lineItems = List();
+crmLineItems = salesOrder.get("Product_Details").toJSONList();
+for each  item in crmLineItems
+{
+	mapItems = Map();
+	name = item.get("product").get("name");
+	discount = item.get("Discount");
+	quantity = item.get("quantity");
+	list_price = item.get("list_price");
+	description = item.get("product_description");
+	mapItems.put("name",name);
+	mapItems.put("quantity",quantity);
+	mapItems.put("description",description);
+	mapItems.put("discount",discount);
+	mapItems.put("rate",list_price);
+	lineItems.add(mapItems);
+}
+//Mapping all the fields
+newSalesOrder.put("customer_id",contactid);
+newSalesOrder.put("line_items",lineItems);
+newSalesOrder.put("is_taxable",false);
+newSalesOrder.put("tax_authority_name","NY-Tax");
+newSalesOrder.put("tax_exemption_code","REMOTE SELLER");
+newSalesOrder.put("discount",10);
+newSalesOrder.put("discount_type","item_level");
+newSalesOrder.put("shipping_charge",shippingCost);
+//Custom Field mapping
+customFields = List();
+customfieldmap = Map();
+customfieldmap1 = Map();
+customfieldmap2 = Map();
+customfieldmap3 = Map();
+customfieldmap4 = Map();
+customfieldmap5 = Map();
+customfieldmap6 = Map();
+customfieldmap7 = Map();
+customfieldmap8 = Map();
+customfieldmap9 = Map();
+customfieldmap10 = Map();
+customfieldmap11 = Map();
+customfieldmap12 = Map();
+customfieldmap13 = Map();
+customfieldmap14 = Map();
+customfieldmap15 = Map();
+customfieldmap.put("api_name","cf_purchase_order");
+customfieldmap.put("value",purchaseOrder);
+customfieldmap.put("api_name","cf_zohocrmreference");
+customfieldmap.put("value",crmID);
+customfieldmap1.put("api_name","cf_subject");
+customfieldmap1.put("value",subjects);
+customfieldmap2.put("api_name","cf_jpi_quote_number");
+customfieldmap2.put("value",jpiQuote);
+customfieldmap3.put("api_name","cf_application");
+customfieldmap3.put("value",application);
+customfieldmap4.put("api_name","cf_attn");
+customfieldmap4.put("value",attn);
+customfieldmap5.put("api_name","cf_carrier");
+customfieldmap5.put("value",carrier);
+customfieldmap6.put("api_name","cf_billing_street");
+customfieldmap6.put("value",billingStreet);
+customfieldmap7.put("api_name","cf_billing_city");
+customfieldmap7.put("value",billingCity);
+customfieldmap8.put("api_name","cf_billing_state");
+customfieldmap8.put("value",billingState);
+customfieldmap9.put("api_name","cf_billing_code");
+customfieldmap9.put("value",billingCode);
+customfieldmap10.put("api_name","cf_billing_country");
+customfieldmap10.put("value",billingCountry);
+customfieldmap11.put("api_name","cf_shipping_street");
+customfieldmap11.put("value",shippingStreet);
+customfieldmap12.put("api_name","cf_shipping_city");
+customfieldmap12.put("value",shippingCity);
+customfieldmap13.put("api_name","cf_shipping_state");
+customfieldmap13.put("value",shippingState);
+customfieldmap14.put("api_name","cf_shipping_code");
+customfieldmap14.put("value",shippingCode);
+customfieldmap15.put("api_name","cf_shipping_country");
+customfieldmap15.put("value",shippingCountry);
+customFields.add(customfieldmap);
+customFields.add(customfieldmap1);
+customFields.add(customfieldmap2);
+customFields.add(customfieldmap3);
+customFields.add(customfieldmap4);
+customFields.add(customfieldmap5);
+customFields.add(customfieldmap6);
+customFields.add(customfieldmap7);
+customFields.add(customfieldmap8);
+customFields.add(customfieldmap9);
+customFields.add(customfieldmap10);
+customFields.add(customfieldmap11);
+customFields.add(customfieldmap12);
+customFields.add(customfieldmap13);
+customFields.add(customfieldmap14);
+customFields.add(customfieldmap15);
+newSalesOrder.put("custom_fields",customFields);
+//Checking if the sales order already exists in Books
+searchRef = {"reference_number":crmID};
+referenceNumberCheck = zoho.books.getRecords("salesorders","812636655",searchRef,"zohobooksconnection");
+if(referenceNumberCheck.get("code") == 0)
+{
+	check = referenceNumberCheck.get("salesorders");
+}
+else
+{
+	info referenceNumberCheck;
+}
+if(check.size() >= 1)
+{
+	// 	salesOrder = check.get(0);
+	// 	zohobooksid = salesOrder.get("salesorder_id");
+	// 	info zohobooksid;
+	// 	zohoCRMBooksMap = zoho.crm.updateRecord("Sales_Orders",crmID,{"zohoBooksIDNumber":"test","Modified_By":salesOrderOwner},{"":""},"zohocrmconnection");
+	// 	info "Zoho CRM Books Map";
+	// 	info zohoCRMBooksMap;
+	info "This reference number already exists";
+}
+else
+{
+	info "Creating sales order in books";
+	info newSalesOrder;
+	booksResponse = zoho.books.createRecord("salesorders",812636655,newSalesOrder,"zohobooksconnection");
+	if(booksResponse.get("code") == 0)
+	{
+		booksIDNumber = booksResponse.get("salesorder").get("salesorder_id");
+		zohoCRMBooksMap = zoho.crm.updateRecord("Sales_Orders",crmID,{"zohoBooksIDNumber":booksIDNumber,"Modified_By":salesOrderOwner},{"":""},"zohocrmconnection");
+		info "Successfully Submitted";
+	}
+	else
+	{
+		info booksResponse;
+	}
+}
+}
