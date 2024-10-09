@@ -33,7 +33,7 @@ AccountName = salesOrder.get("Account_Name").get("name");
 searchParam = {"customer_name":AccountName};
 info "Going to fetch customer in books";
 info searchParam;
-response2 = zoho.books.getRecords("Customers","812636655",searchParam,"zohobooksconnection");
+response2 = zoho.books.getRecords("Customers","orgidhere",searchParam,"zohobooksconnection");
 if(response2.get("code") == 0)
 {
 	contacts = response2.toMap();
@@ -146,7 +146,7 @@ customFields.add(customfieldmap15);
 newSalesOrder.put("custom_fields",customFields);
 //Checking if the sales order already exists in Books
 searchRef = {"reference_number":crmID};
-referenceNumberCheck = zoho.books.getRecords("salesorders","812636655",searchRef,"zohobooksconnection");
+referenceNumberCheck = zoho.books.getRecords("salesorders","orgidhere",searchRef,"zohobooksconnection");
 if(referenceNumberCheck.get("code") == 0)
 {
 	check = referenceNumberCheck.get("salesorders");
@@ -169,7 +169,7 @@ else
 {
 	info "Creating sales order in books";
 	info newSalesOrder;
-	booksResponse = zoho.books.createRecord("salesorders",812636655,newSalesOrder,"zohobooksconnection");
+	booksResponse = zoho.books.createRecord("salesorders",orgidhere,newSalesOrder,"zohobooksconnection");
 	if(booksResponse.get("code") == 0)
 	{
 		booksIDNumber = booksResponse.get("salesorder").get("salesorder_id");
