@@ -29,7 +29,7 @@ attn = salesOrder.get("ATTN");
 //
 AccountName = salesOrder.get("Account_Name").get("name");
 searchParam = {"customer_name":AccountName};
-response2 = zoho.books.getRecords("Customers","812636655",searchParam,"zohobooksconnection");
+response2 = zoho.books.getRecords("Customers","Orgidhere",searchParam,"zohobooksconnection");
 contacts = response2.toMap();
 contactid = contacts.get("contacts").get(0).get("contact_id").toLong();
 zohoBooksID = salesOrder.get("zohoBooksIDNumber");
@@ -126,7 +126,7 @@ customFields.add(customfieldmap13);
 customFields.add(customfieldmap14);
 customFields.add(customfieldmap15);
 newSalesOrder.put("custom_fields",customFields);
-booksResponse = zoho.books.updateRecord("salesorders",812636655,zohoBooksID,newSalesOrder,"zohobooksconnection");
+booksResponse = zoho.books.updateRecord("salesorders",ORGIDHERE,zohoBooksID,newSalesOrder,"zohobooksconnection");
 info booksResponse;
 modifiedByPrevious = zoho.crm.updateRecord("Sales_Orders",crmID,{"Modified_By":modifiedByID},{"":""},"zohocrmconnection");
 }
